@@ -122,3 +122,19 @@ def integer2booleantext(data, column_names, text_value='On'):
             return None
 
     return data
+
+def filterbydates(data, init, end):
+    """ This function filter a Pandas Dataframe by the init and end dates. The index of the Dataframe must 
+    be a datetime index.
+
+    :param data: The data
+    :param init: Init date
+    :param end: End date
+    :type data: Pandas Dataframe whose index is a datetime index
+    :type init: datetime.datetime object
+    :type end: datetime.datetime object
+    :returns: The filtered Dataframe
+    :rtype: Pandas Dataframe
+
+    """
+    return data.ix[init:end]
