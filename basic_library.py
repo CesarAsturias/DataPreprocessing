@@ -1,12 +1,13 @@
 import pandas as pd
 import numpy as np
+from datetime import date, datetime, time, timedelta
 
 import logging
  
 module_logger = logging.getLogger("Data_Library.basic_library")
 
 
-def resample_data(data, period, method="mean"):
+def resample_data(data, period, time_delta=None, method="mean"):
     """ This function performs a "constant interpolation" in a dataframe over  the index date time range
 
     :param data: Pandas Dataframe. It must have a datetime index and one or more numeric columns.
@@ -26,9 +27,10 @@ def resample_data(data, period, method="mean"):
                     - mean: This method should be used only when the resampling interval is greater than the initial granularity. It will return the mean for each bin
                     - pad: This is intended to be used when the resampling interval is smaller than the initial granularity. It will fill the Nan values with the previous valid value. 
                     - sum: This method should be used only when the resampling interval is greater than the initial granularity. It will return the sum of the values within each bin
-
+    :param time_delta: Offset time
     :type data: Pandas Dataframe object
     :type period: String
+    :type time_delta: datetime.timedelta object
     :returns: Pandas Dataframe interpolated constantly
     :rtype: Pandas Dataframe
 
@@ -36,13 +38,19 @@ def resample_data(data, period, method="mean"):
     logger = logging.getLogger("Data_Library.basic_library.resample_data")
     if method == 'mean':
         logger.info("Mean method")
-        return data.resample(period).mean()
+        if time_delta is None:
+            return data.resample(period, convention='end').mean()
+        else:
+            return data.resample(period, loffset=time_delta, convention='end').mean()
     elif method == 'pad':
         logger.info("pad method")
         return (data.resample(period).pad()).bfill() 
     elif method == 'sum':
-        logger.info("sum_bin method")  
-        return data.resample(period).sum()
+        if time_delta is None:
+            logger.info("sum_bin method")
+            return data.resample(period, convention='end').sum()
+        else:
+            return data.resample(period, convention='end', loffset=time_delta).sum()
     else:
         logger.info("Not a valid method: %s" % (method))
         print ("Not a valid method: {}".format(method))
